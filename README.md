@@ -43,7 +43,13 @@ auto label = Label::createWithTTF(ShapingEngine::render(str, false), "bitsy-font
   
   ![image](https://user-images.githubusercontent.com/45469625/217663084-c52fd5fd-9c38-4836-8955-c208897692c0.png)
 
-* All these fonts and more are in the `arabic-fonts` folder in this repo, Enjoy! :D
+* All these cool fonts and more are in the `arabic-fonts` folder in this repo, Enjoy! :D
+
+* This also supports mixed languages (english and arabic) and also newlines!
+
+  ![image](https://user-images.githubusercontent.com/45469625/217664517-3c532be0-da5c-4710-a61d-235c0b5385aa.png)
+  
+  ![image](https://user-images.githubusercontent.com/45469625/217664851-bd85887e-90d4-4845-86da-e52111b1b413.png)
 
 <!-- CONTRIBUTING -->
 ## Contributing
