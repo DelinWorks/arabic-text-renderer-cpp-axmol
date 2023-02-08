@@ -14,7 +14,7 @@ Single-Header Arabic Text Renderer Shaping Engine for axmol/cocos2dx in C++
 <!-- USAGE EXAMPLES -->
 ## Usage
 * Create a new `std::wstring` object containing `utf16` text.
-* Call the function `ShapingEngine::render(your_wstring)`, a narrowed std::string will be returned that displays arabic letters correctly with the correct vowels too!
+* Call the function `ShapingEngine::render(your_wstring)`, a narrowed `std::string` will be returned that displays arabic letters correctly with the correct vowels too!
 
 ## Example
 ```cpp
