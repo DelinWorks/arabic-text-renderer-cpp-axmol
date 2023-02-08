@@ -5,6 +5,13 @@
 #include <wchar.h>
 #include <stdio.h>
 
+/*
+*
+* Unicode Spaces and character information
+* Sources: https://www.compart.com/en/unicode/
+*
+*/
+
 #define RENDER_SYMBOLS L"<>(){}[]~`!@#$%^&*?\"':;"
 
 namespace ShapingEngine {
@@ -208,9 +215,9 @@ namespace ShapingEngine {
         int unicode;
     };
 
-	// Finds and shapes any arabic text in the wstring and then returns it.
+    // Finds and shapes any arabic text in the wstring and then returns it.
     // (Converts to arabic presentation forms A-B, Also Takes care of vowels in words).
-	inline void shape_glyphs(std::wstring& t) {
+    inline void shape_glyphs(std::wstring& t) {
         std::vector<vowel_index> vowels;
         for (int i = 0; i < t.length(); i++)
         {
@@ -261,9 +268,9 @@ namespace ShapingEngine {
             ww[0] = (wchar_t)i.unicode;
             ww[1] = '\x0';
             t.insert(i.index, ww);
-        } 
+        }
         vowels.clear();
-	}
+    }
 
     // Render a piece of text containing arabic text.
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
