@@ -20,7 +20,8 @@ Single-Header Arabic Text Renderer Shaping Engine for axmol/cocos2dx in C++
 std::wstring str = L"السَلامُ عَليكُمْ ورَحْمَةُ اللّهِ وبَركَاتُهْ";
 auto label = Label::createWithTTF(ShapingEngine::render(str), "bitsy-font-with-arabic.ttf", 20);
 ```
-* Without using `ShapingEngine::render()`: 
+* Without using `ShapingEngine::render()`: ![image](https://user-images.githubusercontent.com/45469625/217660241-6f82050e-1984-4f41-a1bf-e5493499b1ca.png)
+
 
 <!-- CONTRIBUTING -->
 ## Contributing
