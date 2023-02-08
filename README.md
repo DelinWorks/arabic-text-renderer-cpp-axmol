@@ -16,7 +16,7 @@ Single-Header Arabic Text Renderer Shaping Engine for cocos2dx/axmol
 * Call the function `ShapingEngine::render(your_wstring)`, a narrowed std::string will be returned that displays arabic letters correctly with the correct vowels too!
 
 ## Example
-```
+```cpp
 std::wstring str = L"السَلامُ عَليكُمْ ورَحْمَةُ اللّهِ وبَركَاتُهْ";
 auto label = Label::createWithTTF(ShapingEngine::render(str, true), "bitsy-font-with-arabic.ttf", 20);
 ```
