@@ -51,6 +51,10 @@ auto label = Label::createWithTTF(ShapingEngine::render(str, false), "bitsy-font
   
   ![image](https://user-images.githubusercontent.com/45469625/217664851-bd85887e-90d4-4845-86da-e52111b1b413.png)
 
+* You can make pixel art fonts look crespier by calling `label->getFontAtlas()->setAliasTexParameters();`
+
+  ![image](https://user-images.githubusercontent.com/45469625/217704180-7ffb0560-9f84-433b-8236-dbc9036b219f.png)
+
 <!-- CONTRIBUTING -->
 ## Contributing
 
