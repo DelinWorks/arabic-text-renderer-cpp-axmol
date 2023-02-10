@@ -99,7 +99,7 @@ void HelloWorld::update(float dt)
 }
 ```
 
-![ezgif com-video-to-gif](https://user-images.githubusercontent.com/45469625/218188342-cc3b6eb9-71e5-4d2c-93eb-68559d3d947f.gif)
+![ezgif com-video-to-gif (1)](https://user-images.githubusercontent.com/45469625/218195340-1b816933-dfe8-4654-8ea9-8a93db6a023b.gif)
 
 <!-- CONTRIBUTING -->
 ## Contributing
