@@ -66,7 +66,7 @@ label->setColor(Color3B(255, 255, 255));
 
 
 std::wstring str = L"هذا نص طويل جدًا لن يقرأه أحد ويركز عليه ، ويستخدم بشكل أساسي للاختبار ، النص لا يزال مستمراً ... سأقوم بالعد تنازلياً 3 2 1";
-std::wstring arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true, 340);
+std::string arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true, 340);
 ```
 
 * The first parameter for `render_wrap` is a ttf config file coming from a label, this is so the function can tell what glyphs have what size and wrap multilines accordingly
@@ -76,15 +76,28 @@ std::wstring arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, tru
 
 * This is a text rendered in multilines:
 
-    ![image](https://user-images.githubusercontent.com/45469625/218172332-25115f19-8f1f-4eab-b37a-5ed2df7fae98.png)
+     ![image](https://user-images.githubusercontent.com/45469625/218175516-11a7edf9-cb8c-44ba-b8eb-e09fadb95dff.png)
+
+
 
 * Notice how the numbers are in correct order! (I said I would do a count down in arabic)
 * If you want arabic numbers you can call the `ShapingEngine::arabify_numbers();`
-```
+
+```cpp
 label->setString(ShapingEngine::arabify_numbers(arText));
 ```
 
-   ![image](https://user-images.githubusercontent.com/45469625/218171936-8468f1d3-9bcd-41bf-b7e5-e117b42424b9.png)
+   ![image](https://user-images.githubusercontent.com/45469625/218175557-7b45bfc9-b03e-4a41-900a-de0c14ff3527.png)
+
+* Text scrolling, Unfortunately `std::string.substr` doesn't work with arabic text but `ShapingEngine::substr()` can be used instead, it takes a string and count, This is different from your typical substr because it it scrolls from right to left (not left to right like `std::string.substr` does)
+
+```cpp
+void HelloWorld::update(float dt)
+{
+    auto str1 = ShapingEngine::substr(arText, (int)currentIndex++);
+    label->setString(ShapingEngine::arabify_numbers(str1));
+}
+```
 
 <!-- CONTRIBUTING -->
 ## Contributing
