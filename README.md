@@ -65,7 +65,7 @@ label->getFontAtlas()->setAliasTexParameters();
 label->setColor(Color3B(255, 255, 255));
 
 
-std::wstring str = L"هذا نص طويل جدًا لن يقرأه أحد ويركز عليه ، ويستخدم بشكل أساسي للاختبار ، ولا يزال مستمراً ... سأقوم بالعد التنازلي 3 2 1";
+std::wstring str = L"هذا نص طويل جدًا لن يقرأه أحد ويركز عليه ، ويستخدم بشكل أساسي للاختبار ، النص لا يزال مستمراً ... سأقوم بالعد تنازلياً 3 2 1";
 std::wstring arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true, 340);
 ```
 
@@ -76,7 +76,15 @@ std::wstring arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, tru
 
 * This is a text rendered in multilines:
 
-    
+    ![image](https://user-images.githubusercontent.com/45469625/218172332-25115f19-8f1f-4eab-b37a-5ed2df7fae98.png)
+
+* Notice how the numbers are in correct order! (I said I would do a count down in arabic)
+* If you want arabic numbers you can call the `ShapingEngine::arabify_numbers();`
+```
+label->setString(ShapingEngine::arabify_numbers(arText));
+```
+
+   ![image](https://user-images.githubusercontent.com/45469625/218171936-8468f1d3-9bcd-41bf-b7e5-e117b42424b9.png)
 
 <!-- CONTRIBUTING -->
 ## Contributing
