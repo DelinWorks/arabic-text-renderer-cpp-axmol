@@ -297,9 +297,9 @@ namespace ShapingEngine {
         vowels.clear();
 	}
 
-    // Render a piece of text containing arabic text.
+    // Render a piece of text containing arabic text. The returned string is NOT narrowed
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline std::wstring render(std::wstring t, bool render_with_symbols = false) {
+    inline std::wstring wrender(std::wstring t, bool render_with_symbols = false) {
         Glyph::init_arabic();
         std::vector<std::wstring> words;
         Helper::wsplit(t, L" ", words);
@@ -314,12 +314,19 @@ namespace ShapingEngine {
         return t;
     }
 
+    // Render a piece of text containing arabic text. The returned string IS narrowed
+    // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
+    inline std::string render(std::wstring t, bool render_with_symbols = false) {
+        return Helper::narrow(wrender(t, render_with_symbols));
+    }
+
     // Render a piece of text containing arabic text that can may contain numbers or multiple lines.
+    // returns a wide string
     // @param tff ttf font definition from a label
     // @param t text to render
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    // @param wrapX pixels that a sentence must exceed to go to the next line
-    inline std::wstring render_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrapX = FLT_MAX) {
+    // @param wrap_x pixels that a sentence must exceed to go to the next line
+    inline std::wstring wrender_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
         auto lb = ax::Label::createWithTTF(Helper::narrow(t), ttf.fontFilePath, ttf.fontSize);
         lb->updateContent();
         auto fontAtlas = lb->getFontAtlas();
@@ -337,21 +344,33 @@ namespace ShapingEngine {
                     accWidth += letter.width * 2;
                 }
             }
-            if (accWidth > wrapX && wordCount > 1)
+            if (accWidth > wrap_x && wordCount > 1)
                 wordCount--;
             else {
                 for (int i = wordCount - 1; i >= 0; i--)
-                    accString += render(words[i], render_with_symbols) + L" ";
+                    accString += wrender(words[i], render_with_symbols) + L" ";
                 words.erase(words.begin(), words.begin() + wordCount);
                 wordCount = words.size();
-                if (words.empty()) break;
                 accString += L"\n";
+                if (words.empty()) break;
             }
         }
         return accString;
     }
+    
+    // Render a piece of text containing arabic text that can may contain numbers or multiple lines.
+    // returns a narrowed string
+    // @param tff ttf font definition from a label
+    // @param t text to render
+    // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
+    // @param wrap_x pixels that a sentence must exceed to go to the next line
+    inline std::string render_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
+        return Helper::narrow(wrender_wrap(ttf, t, render_with_symbols, wrap_x));
+    }
 
-    inline std::wstring arabify_numbers(std::wstring& t) {
+    // Converts normal numbers 123 to arabic the Hindu–Arabic or Indo–Arabic numerals
+    // returns a wide string
+    inline std::wstring w_arabify_numbers(std::wstring t) {
         for (int i = 0; i < t.length(); i++)
         {
             if (t[i] == L'0')
@@ -378,9 +397,22 @@ namespace ShapingEngine {
         return t;
     }
 
+    // Converts normal numbers 123 to arabic the Hindu–Arabic or Indo–Arabic numerals
+    // returns a narrowed string
+    inline std::string arabify_numbers(std::wstring& t) {
+        return Helper::narrow(w_arabify_numbers(t));
+    }
+    
+    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
+    // returns a narrowed string
+    inline std::string arabify_numbers(std::string& t) {
+        return Helper::narrow(w_arabify_numbers(Helper::widen(t)));
+    }
+
     // Splits the text for each new line it finds, then it reverses the order of everyline
     // then creates a substr of that text, Can be used with scrolling text in games
-    inline std::wstring substr(std::wstring t, int count) {
+    // returns a wide string
+    inline std::wstring wsubstr(std::wstring t, int count) {
         std::vector<std::wstring> words;
         Helper::wsplit(t, L"\n", words);
         std::wstring accString;
@@ -398,5 +430,19 @@ namespace ShapingEngine {
         accString.erase(accString.length());
         Helper::wreplace(accString, L"\\", L"\n");
         return accString;
+    }
+
+    // Splits the text for each new line it finds, then it reverses the order of everyline
+    // then creates a substr of that text, Can be used with scrolling text in games
+    // returns a narrowed string
+    inline std::string substr(std::wstring t, int count) {
+        return Helper::narrow(wsubstr(t, count));
+    }
+    
+    // Splits the text for each new line it finds, then it reverses the order of everyline
+    // then creates a substr of that text, Can be used with scrolling text in games
+    // returns a narrowed string
+    inline std::string substr(std::string t, int count) {
+        return Helper::narrow(wsubstr(Helper::widen(t), count));
     }
 }
