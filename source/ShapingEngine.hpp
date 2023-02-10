@@ -4,19 +4,44 @@
 #include <vector>
 #include <wchar.h>
 #include <stdio.h>
+#include <axmol.h>
 
 /*
-*
+* 
 * Unicode Spaces and character information
 * Sources: https://www.compart.com/en/unicode/
-*
+* 
 */
 
-#define RENDER_SYMBOLS L"<>(){}[]~`!@#$%^&*?\"':;"
+#define RENDER_SYMBOLS L"<>(){}[]~`!@#$%^&*?\"':;\\"
 
 namespace ShapingEngine {
 
     namespace Helper {
+
+        inline void split(std::string& str, const char* delim, std::vector<std::string>& out)
+        {
+            size_t start;
+            size_t end = 0;
+
+            while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
+            {
+                end = str.find(delim, start);
+                out.push_back(str.substr(start, end - start));
+            }
+        }
+
+        inline void wsplit(std::wstring& str, const wchar_t* delim, std::vector<std::wstring>& out)
+        {
+            size_t start;
+            size_t end = 0;
+
+            while ((start = str.find_first_not_of(delim, end)) != std::wstring::npos)
+            {
+                end = str.find(delim, start);
+                out.push_back(str.substr(start, end - start));
+            }
+        }
 
         inline bool replace(std::string& str, const std::string& from, const std::string& to) {
             size_t start_pos = str.find(from);
@@ -215,9 +240,9 @@ namespace ShapingEngine {
         int unicode;
     };
 
-    // Finds and shapes any arabic text in the wstring and then returns it.
+	// Finds and shapes any arabic text in the wstring and then returns it.
     // (Converts to arabic presentation forms A-B, Also Takes care of vowels in words).
-    inline void shape_glyphs(std::wstring& t) {
+	inline void shape_glyphs(std::wstring& t) {
         std::vector<vowel_index> vowels;
         for (int i = 0; i < t.length(); i++)
         {
@@ -268,22 +293,110 @@ namespace ShapingEngine {
             ww[0] = (wchar_t)i.unicode;
             ww[1] = '\x0';
             t.insert(i.index, ww);
-        }
+        } 
         vowels.clear();
-    }
+	}
 
     // Render a piece of text containing arabic text.
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline std::string render(std::wstring text, bool render_with_symbols = false) {
+    inline std::wstring render(std::wstring t, bool render_with_symbols = false) {
         Glyph::init_arabic();
+        std::vector<std::wstring> words;
+        Helper::wsplit(t, L" ", words);
         // *** For special characters like لا لأ لإ لآ
-        while (Helper::wreplace(text, L"\u0644\u0627", L"\uFEFB")); // لا
-        while (Helper::wreplace(text, L"\u0644\u0623", L"\uFEF7")); // لأ
-        while (Helper::wreplace(text, L"\u0644\u0625", L"\uFEF9")); // لإ
-        while (Helper::wreplace(text, L"\u0644\u0622", L"\uFEF5")); // لآ
+        while (Helper::wreplace(t, L"\u0644\u0627", L"\uFEFB")); // لا
+        while (Helper::wreplace(t, L"\u0644\u0623", L"\uFEF7")); // لأ
+        while (Helper::wreplace(t, L"\u0644\u0625", L"\uFEF9")); // لإ
+        while (Helper::wreplace(t, L"\u0644\u0622", L"\uFEF5")); // لآ
         // ***************************************
-        shape_glyphs(text);
-        reorder_glyphs(text, render_with_symbols);
-        return Helper::narrow(text);
+        shape_glyphs(t);
+        reorder_glyphs(t, render_with_symbols);
+        return t;
+    }
+
+    // Render a piece of text containing arabic text that can may contain numbers or multiple lines.
+    // @param tff ttf font definition from a label
+    // @param t text to render
+    // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
+    // @param wrapX pixels that a sentence must exceed to go to the next line
+    inline std::wstring render_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrapX = FLT_MAX) {
+        auto lb = ax::Label::createWithTTF(Helper::narrow(t), ttf.fontFilePath, ttf.fontSize);
+        lb->updateContent();
+        auto fontAtlas = lb->getFontAtlas();
+        std::vector<std::wstring> words;
+        Helper::wsplit(t, L" ", words);
+        int wordCount = words.size();
+        std::wstring accString;
+        while (true) {
+            float accWidth = 0;
+            for (int i = 0; i < wordCount; i++) {
+                for (int w = 0; w < words[i].length(); w++)
+                {
+                    ax::FontLetterDefinition letter;
+                    fontAtlas->getLetterDefinitionForChar(words[i][w], letter);
+                    accWidth += letter.width * 2;
+                }
+            }
+            if (accWidth > wrapX && wordCount > 1)
+                wordCount--;
+            else {
+                for (int i = wordCount - 1; i >= 0; i--)
+                    accString += render(words[i], render_with_symbols) + L" ";
+                words.erase(words.begin(), words.begin() + wordCount);
+                wordCount = words.size();
+                if (words.empty()) break;
+                accString += L"\n";
+            }
+        }
+        return accString;
+    }
+
+    inline std::wstring arabify_numbers(std::wstring& t) {
+        for (int i = 0; i < t.length(); i++)
+        {
+            if (t[i] == L'0')
+                t[i] = L'\u0660';
+            if (t[i] == L'1')
+                t[i] = L'\u0661';
+            if (t[i] == L'2')
+                t[i] = L'\u0662';
+            if (t[i] == L'3')
+                t[i] = L'\u0663';
+            if (t[i] == L'4')
+                t[i] = L'\u0664';
+            if (t[i] == L'5')
+                t[i] = L'\u0665';
+            if (t[i] == L'6')
+                t[i] = L'\u0666';
+            if (t[i] == L'7')
+                t[i] = L'\u0667';
+            if (t[i] == L'8')
+                t[i] = L'\u0668';
+            if (t[i] == L'9')
+                t[i] = L'\u0669';
+        }
+        return t;
+    }
+
+    // Splits the text for each new line it finds, then it reverses the order of everyline
+    // then creates a substr of that text, Can be used with scrolling text in games
+    inline std::wstring substr(std::wstring t, int count) {
+        std::vector<std::wstring> words;
+        Helper::wsplit(t, L"\n", words);
+        std::wstring accString;
+        int accCount = 0;
+        for (auto& s : words) {
+            accCount += s.length();
+            int c = t.length() - ((t.length() + count) - accCount);
+            if (c < 0)
+                accString += s + L'\n';
+            else if (c < s.length() + 1) {
+                accString += s.substr(c, s.length()) + L"\n ";
+                break;
+            }
+        }
+        accString.erase(accString.length());
+        Helper::wreplace(accString, L"\\", L"\n");
+        return accString;
     }
 }
