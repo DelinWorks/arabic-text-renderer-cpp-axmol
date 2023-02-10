@@ -55,6 +55,29 @@ auto label = Label::createWithTTF(ShapingEngine::render(str, false), "bitsy-font
 
   ![image](https://user-images.githubusercontent.com/45469625/217704180-7ffb0560-9f84-433b-8236-dbc9036b219f.png)
 
+* If you want to render multiline arabic text or text that contains numbers you need to use the `ShapingEngine::render_wrap()`, NOTE: for multilines unfortunetly it doesn't work with `setDimension` and overflow texts in general, that's why `render_wrap` needs to be used.
+
+```cpp
+label = Label::createWithTTF("", "bitsy-font-with-arabic.ttf", 20);
+label->setVerticalAlignment(TextVAlignment::TOP);
+label->setHorizontalAlignment(TextHAlignment::RIGHT);
+label->getFontAtlas()->setAliasTexParameters();
+label->setColor(Color3B(255, 255, 255));
+
+
+std::wstring str = L"هذا نص طويل جدًا لن يقرأه أحد ويركز عليه ، ويستخدم بشكل أساسي للاختبار ، ولا يزال مستمراً ... سأقوم بالعد التنازلي 3 2 1";
+std::wstring arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true, 340);
+```
+
+* The first parameter for `render_wrap` is a ttf config file coming from a label, this is so the function can tell what glyphs have what size and wrap multilines accordingly
+* seond parameter is your favourite string!
+* third is whether to use symbols or not.
+* and fourth is for horizontal wrap size in pixels, this will make sure that the text never exceeds that, if it does then it moves the rest to a new line and so on.
+
+* This is a text rendered in multilines:
+
+    
+
 <!-- CONTRIBUTING -->
 ## Contributing
 
