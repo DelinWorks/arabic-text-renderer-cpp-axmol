@@ -69,7 +69,7 @@ std::wstring str = L"هذا نص طويل جدًا لن يقرأه أحد وير
 std::string arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true, 340);
 ```
 
-* The first parameter for `render_wrap` is a ttf config file coming from a label, this is so the function can tell what glyphs have what size and wrap multilines accordingly
+* The first parameter for `render_wrap` is a ttf config file coming from a label, this gives the function the ability to tell what glyphs have what size and how to wrap multilines accordingly.
 * seond parameter is your favourite string!
 * third is whether to use symbols or not.
 * and fourth is for horizontal wrap size in pixels, this will make sure that the text never exceeds that, if it does then it moves the rest to a new line and so on.
@@ -80,8 +80,8 @@ std::string arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true
 
 
 
-* Notice how the numbers are in correct order! (I said I would do a count down in arabic)
-* If you want arabic numbers you can call the `ShapingEngine::arabify_numbers();`
+* Notice how the numbers are in correct order! (In the text, I said I would do a count down in arabic)
+* If you want arabic numbers (١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩ ١٠) you can call the `ShapingEngine::arabify_numbers();`
 
 ```cpp
 label->setString(ShapingEngine::arabify_numbers(arText));
@@ -89,7 +89,7 @@ label->setString(ShapingEngine::arabify_numbers(arText));
 
    ![image](https://user-images.githubusercontent.com/45469625/218175557-7b45bfc9-b03e-4a41-900a-de0c14ff3527.png)
 
-* Text scrolling, Unfortunately `std::string.substr` doesn't work with arabic text but `ShapingEngine::substr()` can be used instead, This is different from your typical substr because it it scrolls from right to left (not left to right like `std::string.substr` does)
+* Text Scrolling, Unfortunately `std::string.substr` doesn't work with arabic text but `ShapingEngine::substr()` can be used instead, This is different from your typical substr because it scrolls from right to left (not left to right like `std::string.substr` does)
 
 ```cpp
 void HelloWorld::update(float dt)
