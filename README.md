@@ -1,4 +1,4 @@
-# axmol-arabic-renderer
+# arabic text renderer
 Single-Header Arabic Text Renderer Shaping Engine for axmol/cocos2dx in C++
 
 <!-- GETTING STARTED -->
@@ -89,7 +89,7 @@ label->setString(ShapingEngine::arabify_numbers(arText));
 
    ![image](https://user-images.githubusercontent.com/45469625/218175557-7b45bfc9-b03e-4a41-900a-de0c14ff3527.png)
 
-* Text scrolling, Unfortunately `std::string.substr` doesn't work with arabic text but `ShapingEngine::substr()` can be used instead, it takes a string and count, This is different from your typical substr because it it scrolls from right to left (not left to right like `std::string.substr` does)
+* Text scrolling, Unfortunately `std::string.substr` doesn't work with arabic text but `ShapingEngine::substr()` can be used instead, This is different from your typical substr because it it scrolls from right to left (not left to right like `std::string.substr` does)
 
 ```cpp
 void HelloWorld::update(float dt)
