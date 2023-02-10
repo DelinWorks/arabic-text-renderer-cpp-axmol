@@ -69,7 +69,7 @@ std::wstring str = L"هذا نص طويل جدًا لن يقرأه أحد وير
 std::string arText = ShapingEngine::render_wrap(label->getTTFConfig(), str, true, 340);
 ```
 
-* The first parameter for `render_wrap` is a ttf config file coming from a label, this gives the function the ability to tell what glyphs have what size and how to wrap multilines accordingly.
+* The first parameter for `render_wrap` is a ttf config object coming from a label, this gives the function the ability to tell what glyphs have what size and how to wrap multilines accordingly.
 * seond parameter is your favourite string!
 * third is whether to use symbols or not.
 * and fourth is for horizontal wrap size in pixels, this will make sure that the text never exceeds that, if it does then it moves the rest to a new line and so on.
