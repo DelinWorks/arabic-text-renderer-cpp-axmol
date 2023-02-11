@@ -101,6 +101,18 @@ namespace ShapingEngine {
             return false;
         }
 
+        // Arabic letters range from U+0600 to U+06FF
+        // (and U+FB50 to U+FDFF for Arabic Presentation Forms-A)
+        // (and U+FE70 to U+FEFF for Arabic Presentation Forms-B)
+        inline bool is_arabic_word(std::wstring& c) {
+            for (int i = 0; i < c.length(); i++)
+            {
+                if (is_arabic_letter(c[i]))
+                    return true;
+            }
+            return false;
+        }
+
         inline bool is_arabic_vowel(wchar_t v) {
             // check if the character is a vowel
             int asciiValue = (int)v;
@@ -326,6 +338,7 @@ namespace ShapingEngine {
     // @param t text to render
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
     // @param wrap_x pixels that a sentence must exceed to go to the next line
+    // @param presist_non_arabic_text any non arabic text will be shown as is without any modification, if the entire text is arabic, leave this false as much as possible as this function is quite expensive
     inline std::wstring wrender_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
         auto lb = ax::Label::createWithTTF(Helper::narrow(t), ttf.fontFilePath, ttf.fontSize);
         lb->updateContent();
@@ -333,6 +346,23 @@ namespace ShapingEngine {
         std::vector<std::wstring> words;
         Helper::wsplit(t, L" ", words);
         int wordCount = words.size();
+        bool s = false;
+        int f, l;
+        for (int i = 0; i < words.size(); i++)
+        {
+            if (!Helper::is_arabic_word(words[i]) && !s)
+            {
+                f = i;
+                s = true;
+            }
+
+            if (Helper::is_arabic_word(words[i]) && s)
+            {
+                l = i - 1;
+                s = false;
+                std::reverse(words.begin() + f, words.begin() + l);
+            }
+        }
         std::wstring accString;
         while (true) {
             float accWidth = 0;
