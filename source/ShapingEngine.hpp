@@ -106,10 +106,8 @@ namespace ShapingEngine {
         // (and U+FE70 to U+FEFF for Arabic Presentation Forms-B)
         inline bool is_arabic_word(std::wstring& c) {
             for (int i = 0; i < c.length(); i++)
-            {
                 if (is_arabic_letter(c[i]))
                     return true;
-            }
             return false;
         }
 
@@ -397,7 +395,7 @@ namespace ShapingEngine {
         return Helper::narrow(wrender_wrap(ttf, t, render_with_symbols, wrap_x));
     }
 
-    // Converts normal numbers 123 to arabic the Hindu–Arabic or Indo–Arabic numerals
+    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
     // returns a wide string
     inline std::wstring w_arabify_numbers(std::wstring t) {
         for (int i = 0; i < t.length(); i++)
@@ -426,7 +424,7 @@ namespace ShapingEngine {
         return t;
     }
 
-    // Converts normal numbers 123 to arabic the Hindu–Arabic or Indo–Arabic numerals
+    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
     // returns a narrowed string
     inline std::string arabify_numbers(std::wstring& t) {
         return Helper::narrow(w_arabify_numbers(t));
@@ -438,7 +436,7 @@ namespace ShapingEngine {
         return Helper::narrow(w_arabify_numbers(Helper::widen(t)));
     }
 
-    // Splits the text for each new line it finds, then it reverses the order of everyline
+    // Splits the text for each new line it finds, then it reverses the words in all lines
     // then creates a substr of that text, Can be used with scrolling text in games
     // returns a wide string
     inline std::wstring wsubstr(std::wstring t, int count) {
@@ -457,7 +455,6 @@ namespace ShapingEngine {
             }
         }
         accString.erase(accString.length());
-        Helper::wreplace(accString, L"\\", L"\n");
         return accString;
     }
 
