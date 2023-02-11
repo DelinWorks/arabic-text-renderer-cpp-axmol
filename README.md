@@ -29,7 +29,7 @@ auto label = Label::createWithTTF(ShapingEngine::render(str, false), "bitsy-font
   
   ![image](https://user-images.githubusercontent.com/45469625/217661940-c021e8f8-2c8d-4d2e-909b-b0a416cf5bd7.png)
 
-* The second optinal parameter in `ShapingEngine::render()` is called `render_with_symbols` which simply treats the charachters `<>(){}[]~!@#$%^&*?"':;` as arabic characters, this makes it easier to write arabic text inside parantheses, number ordering, and so much more!
+* The second optinal parameter in `ShapingEngine::render()` is called `render_with_symbols` which simply treats the charachters `".,<>(){}[]~!@#$%^&*?"':;\"` as arabic characters, this makes it easier to write arabic text inside parantheses, number ordering, and so much more!
   
 * render_with_symbols set to `false`
 

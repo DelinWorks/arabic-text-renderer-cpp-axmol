@@ -13,7 +13,7 @@
 * 
 */
 
-#define RENDER_SYMBOLS L"<>(){}[]~`!@#$%^&*?\"':;\\"
+#define RENDER_SYMBOLS L".,<>(){}[]~`!@#$%^&*?\"':;\\"
 
 namespace ShapingEngine {
 
@@ -341,7 +341,7 @@ namespace ShapingEngine {
                 {
                     ax::FontLetterDefinition letter;
                     fontAtlas->getLetterDefinitionForChar(words[i][w], letter);
-                    accWidth += letter.width * 2;
+                    accWidth += letter.width;
                 }
             }
             if (accWidth > wrap_x && wordCount > 1)
