@@ -358,7 +358,7 @@ namespace ShapingEngine {
 
             if (Helper::is_arabic_word(words[i]) && s)
             {
-                l = i - 1;
+                l = i;
                 s = false;
                 std::reverse(words.begin() + f, words.begin() + l);
             }
