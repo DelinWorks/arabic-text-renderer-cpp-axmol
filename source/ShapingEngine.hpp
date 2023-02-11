@@ -347,7 +347,7 @@ namespace ShapingEngine {
         Helper::wsplit(t, L" ", words);
         int wordCount = words.size();
         bool s = false;
-        int f, l;
+        int f;
         for (int i = 0; i < words.size(); i++)
         {
             if (!Helper::is_arabic_word(words[i]) && !s)
@@ -358,9 +358,8 @@ namespace ShapingEngine {
 
             if (Helper::is_arabic_word(words[i]) && s)
             {
-                l = i;
                 s = false;
-                std::reverse(words.begin() + f, words.begin() + l);
+                std::reverse(words.begin() + f, words.begin() + i);
             }
         }
         std::wstring accString;
