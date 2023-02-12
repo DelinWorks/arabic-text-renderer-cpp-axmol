@@ -19,7 +19,7 @@ namespace ShapingEngine {
 
     namespace Helper {
 
-        inline void split(std::string& str, const char* delim, std::vector<std::string>& out)
+        inline void split(const std::string& str, const char* delim, std::vector<std::string>& out)
         {
             size_t start;
             size_t end = 0;
@@ -31,7 +31,7 @@ namespace ShapingEngine {
             }
         }
 
-        inline void wsplit(std::wstring& str, const wchar_t* delim, std::vector<std::wstring>& out)
+        inline void wsplit(const std::wstring& str, const wchar_t* delim, std::vector<std::wstring>& out)
         {
             size_t start;
             size_t end = 0;
@@ -59,7 +59,7 @@ namespace ShapingEngine {
             return true;
         }
 
-        inline std::wstring widen(const std::string& utf8)
+        inline std::wstring& widen(const std::string& utf8)
         {
             std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
             std::u16string utf16 = convert.from_bytes(utf8);
@@ -67,7 +67,7 @@ namespace ShapingEngine {
             return wstr;
         }
 
-        inline std::string narrow(const std::wstring& utf16) {
+        inline std::string& narrow(const std::wstring& utf16) {
             std::u16string u16str(utf16.begin(), utf16.end());
             std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
             std::string utf8 = convert.to_bytes(u16str);
@@ -88,7 +88,7 @@ namespace ShapingEngine {
         // Arabic letters range from U+0600 to U+06FF
         // (and U+FB50 to U+FDFF for Arabic Presentation Forms-A)
         // (and U+FE70 to U+FEFF for Arabic Presentation Forms-B)
-        inline bool is_arabic_letter(wchar_t c, bool space = false, bool symbols = false) {
+        inline bool is_arabic_letter(const wchar_t& c, bool space = false, bool symbols = false) {
             int asciiValue = (int)c;
 
             if (asciiValue >= 1536 && asciiValue <= 1791
@@ -111,7 +111,7 @@ namespace ShapingEngine {
             return false;
         }
 
-        inline bool is_arabic_vowel(wchar_t v) {
+        inline bool is_arabic_vowel(const wchar_t& v) {
             // check if the character is a vowel
             int asciiValue = (int)v;
             if (asciiValue >= 1611 && asciiValue <= 1631)
@@ -211,6 +211,18 @@ namespace ShapingEngine {
         }
     };
 
+    inline Glyph _glyph(int glyph) {
+        auto pos = glyphs.find(glyph);
+        if (pos != glyphs.end())
+            return pos->second;
+        else return Glyph(L"   ");
+    }
+
+    struct vowel_index {
+        int index;
+        int unicode;
+    };
+
     // Finds and reoders any arabic text in the wstring.
     inline void reorder_glyphs(std::wstring& t, bool symbols) {
         bool f = false;
@@ -237,18 +249,6 @@ namespace ShapingEngine {
             std::reverse(t.begin() + ix, t.end());
         }
     }
-
-    inline Glyph _glyph(int glyph) {
-        auto pos = glyphs.find(glyph);
-        if (pos != glyphs.end())
-            return pos->second;
-        else return Glyph(L"   ");
-    }
-
-    struct vowel_index {
-        int index;
-        int unicode;
-    };
 
 	// Finds and shapes any arabic text in the wstring and then returns it.
     // (Converts to arabic presentation forms A-B, Also Takes care of vowels in words).
@@ -307,9 +307,9 @@ namespace ShapingEngine {
         vowels.clear();
 	}
 
-    // Render a piece of text containing arabic text. The returned string is NOT narrowed
+    // Render a piece of text containing arabic text. The string passed will not be copied and will be modified directly
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline std::wstring wrender(std::wstring t, bool render_with_symbols = false) {
+    inline void render_ref(std::wstring& t, bool render_with_symbols = false) {
         Glyph::init_arabic();
         std::vector<std::wstring> words;
         Helper::wsplit(t, L" ", words);
@@ -321,12 +321,19 @@ namespace ShapingEngine {
         // ***************************************
         shape_glyphs(t);
         reorder_glyphs(t, render_with_symbols);
-        return t;
+    }
+
+    // Render a piece of text containing arabic text. The returned string is NOT narrowed
+    // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
+    inline std::wstring wrender(std::wstring t, bool render_with_symbols = false) {
+        std::wstring out;
+        render_ref(out, render_with_symbols);
+        return out;
     }
 
     // Render a piece of text containing arabic text. The returned string IS narrowed
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline std::string render(std::wstring t, bool render_with_symbols = false) {
+    inline std::string render(std::wstring& t, bool render_with_symbols = false) {
         return Helper::narrow(wrender(t, render_with_symbols));
     }
 
@@ -397,7 +404,7 @@ namespace ShapingEngine {
 
     // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
     // returns a wide string
-    inline std::wstring w_arabify_numbers(std::wstring t) {
+    inline std::wstring w_arabify_numbers(std::wstring& t) {
         for (int i = 0; i < t.length(); i++)
         {
             if (t[i] == L'0')
@@ -433,13 +440,14 @@ namespace ShapingEngine {
     // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
     // returns a narrowed string
     inline std::string arabify_numbers(std::string& t) {
-        return Helper::narrow(w_arabify_numbers(Helper::widen(t)));
+        auto n = Helper::widen(t);
+        return Helper::narrow(w_arabify_numbers(n));
     }
 
     // Splits the text for each new line it finds, then it reverses the words in all lines
     // then creates a substr of that text, Can be used with scrolling text in games
     // returns a wide string
-    inline std::wstring wsubstr(std::wstring t, int count) {
+    inline std::wstring wsubstr(std::wstring& t, int count) {
         std::vector<std::wstring> words;
         Helper::wsplit(t, L"\n", words);
         std::wstring accString;
@@ -461,14 +469,15 @@ namespace ShapingEngine {
     // Splits the text for each new line it finds, then it reverses the order of everyline
     // then creates a substr of that text, Can be used with scrolling text in games
     // returns a narrowed string
-    inline std::string substr(std::wstring t, int count) {
+    inline std::string substr(std::wstring& t, int count) {
         return Helper::narrow(wsubstr(t, count));
     }
     
     // Splits the text for each new line it finds, then it reverses the order of everyline
     // then creates a substr of that text, Can be used with scrolling text in games
     // returns a narrowed string
-    inline std::string substr(std::string t, int count) {
-        return Helper::narrow(wsubstr(Helper::widen(t), count));
+    inline std::string substr(std::string& t, int count) {
+        auto n = Helper::widen(t);
+        return Helper::narrow(wsubstr(n, count));
     }
 }
