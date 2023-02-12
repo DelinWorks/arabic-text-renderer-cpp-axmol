@@ -59,7 +59,7 @@ namespace ShapingEngine {
             return true;
         }
 
-        inline std::wstring& widen(const std::string& utf8)
+        inline std::wstring widen(const std::string& utf8)
         {
             std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
             std::u16string utf16 = convert.from_bytes(utf8);
@@ -67,7 +67,7 @@ namespace ShapingEngine {
             return wstr;
         }
 
-        inline std::string& narrow(const std::wstring& utf16) {
+        inline std::string narrow(const std::wstring& utf16) {
             std::u16string u16str(utf16.begin(), utf16.end());
             std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
             std::string utf8 = convert.to_bytes(u16str);
@@ -326,7 +326,7 @@ namespace ShapingEngine {
     // Render a piece of text containing arabic text. The returned string is NOT narrowed
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
     inline std::wstring wrender(std::wstring t, bool render_with_symbols = false) {
-        std::wstring out;
+        std::wstring out = t;
         render_ref(out, render_with_symbols);
         return out;
     }
