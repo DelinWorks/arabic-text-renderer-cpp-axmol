@@ -20,6 +20,11 @@
 
 namespace ShapingEngine {
 
+    namespace Options {
+        // converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals automatically.
+        inline bool _convertToArabicNumbers = false;
+    }
+
     namespace Helper {
 
         inline void split(const std::string& str, const char* delim, std::vector<std::string>& out)
@@ -310,6 +315,48 @@ namespace ShapingEngine {
         vowels.clear();
 	}
 
+    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
+    // returns a wide string
+    inline std::wstring w_arabify_numbers(std::wstring& t) {
+        for (int i = 0; i < t.length(); i++)
+        {
+            if (t[i] == L'0')
+                t[i] = L'\u0660';
+            else if (t[i] == L'1')
+                t[i] = L'\u0661';
+            else if (t[i] == L'2')
+                t[i] = L'\u0662';
+            else if (t[i] == L'3')
+                t[i] = L'\u0663';
+            else if (t[i] == L'4')
+                t[i] = L'\u0664';
+            else if (t[i] == L'5')
+                t[i] = L'\u0665';
+            else if (t[i] == L'6')
+                t[i] = L'\u0666';
+            else if (t[i] == L'7')
+                t[i] = L'\u0667';
+            else if (t[i] == L'8')
+                t[i] = L'\u0668';
+            else if (t[i] == L'9')
+                t[i] = L'\u0669';
+        }
+        return t;
+    }
+
+    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
+    // returns a narrowed string
+    inline std::string arabify_numbers(std::wstring& t) {
+        return Helper::narrow(w_arabify_numbers(t));
+    }
+
+    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
+    // returns a narrowed string
+    inline std::string arabify_numbers(std::string& t) {
+        auto n = Helper::widen(t);
+        return Helper::narrow(w_arabify_numbers(n));
+    }
+
     // Render a piece of text containing arabic text. The string passed will not be copied and will be modified directly
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
     inline void render_ref(std::wstring& t, bool render_with_symbols = false) {
@@ -324,6 +371,8 @@ namespace ShapingEngine {
         // ***************************************
         shape_glyphs(t);
         reorder_glyphs(t, render_with_symbols);
+        if (Options::_convertToArabicNumbers)
+            t = w_arabify_numbers(t);
     }
 
     // Render a piece of text containing arabic text. The returned string is NOT narrowed
@@ -346,7 +395,6 @@ namespace ShapingEngine {
     // @param t text to render
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
     // @param wrap_x pixels that a sentence must exceed to go to the next line
-    // @param presist_non_arabic_text any non arabic text will be shown as is without any modification, if the entire text is arabic, leave this false as much as possible as this function is quite expensive
     inline std::wstring wrender_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
         auto lb = ax::Label::createWithTTF(Helper::narrow(t), ttf.fontFilePath, ttf.fontSize);
         lb->updateContent();
@@ -392,7 +440,7 @@ namespace ShapingEngine {
                 if (words.empty()) break;
             }
         }
-        return accString;
+        return (Options::_convertToArabicNumbers ? w_arabify_numbers(accString) : accString);
     }
     
     // Render a piece of text containing arabic text that can may contain numbers or multiple lines.
@@ -403,48 +451,6 @@ namespace ShapingEngine {
     // @param wrap_x pixels that a sentence must exceed to go to the next line
     inline std::string render_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
         return Helper::narrow(wrender_wrap(ttf, t, render_with_symbols, wrap_x));
-    }
-
-    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
-    // returns a wide string
-    inline std::wstring w_arabify_numbers(std::wstring& t) {
-        for (int i = 0; i < t.length(); i++)
-        {
-            if (t[i] == L'0')
-                t[i] = L'\u0660';
-            if (t[i] == L'1')
-                t[i] = L'\u0661';
-            if (t[i] == L'2')
-                t[i] = L'\u0662';
-            if (t[i] == L'3')
-                t[i] = L'\u0663';
-            if (t[i] == L'4')
-                t[i] = L'\u0664';
-            if (t[i] == L'5')
-                t[i] = L'\u0665';
-            if (t[i] == L'6')
-                t[i] = L'\u0666';
-            if (t[i] == L'7')
-                t[i] = L'\u0667';
-            if (t[i] == L'8')
-                t[i] = L'\u0668';
-            if (t[i] == L'9')
-                t[i] = L'\u0669';
-        }
-        return t;
-    }
-
-    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
-    // returns a narrowed string
-    inline std::string arabify_numbers(std::wstring& t) {
-        return Helper::narrow(w_arabify_numbers(t));
-    }
-    
-    // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
-    // returns a narrowed string
-    inline std::string arabify_numbers(std::string& t) {
-        auto n = Helper::widen(t);
-        return Helper::narrow(w_arabify_numbers(n));
     }
 
     // Splits the text for each new line it finds, then it reverses the words in all lines
