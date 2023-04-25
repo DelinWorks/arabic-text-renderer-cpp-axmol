@@ -96,7 +96,7 @@ namespace ShapingEngine {
         // Arabic letters range from U+0600 to U+06FF
         // (and U+FB50 to U+FDFF for Arabic Presentation Forms-A)
         // (and U+FE70 to U+FEFF for Arabic Presentation Forms-B)
-        inline bool is_arabic_letter(const wchar_t& c, bool space = false, bool symbols = false) {
+        inline bool is_arabic_letter(const wchar_t c, bool space = false, bool symbols = false) {
             int asciiValue = (int)c;
 
             if (asciiValue >= 1536 && asciiValue <= 1791
@@ -119,8 +119,8 @@ namespace ShapingEngine {
             return false;
         }
 
-        inline bool is_arabic_vowel(const wchar_t& v) {
-            // check if the character is a vowel
+        // check if the character is a vowel.
+        inline bool is_arabic_vowel(const wchar_t v) {
             int asciiValue = (int)v;
             if (asciiValue >= 1611 && asciiValue <= 1631)
                 return true;
