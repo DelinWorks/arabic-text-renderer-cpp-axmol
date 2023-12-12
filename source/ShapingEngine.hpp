@@ -16,13 +16,15 @@
 * 
 */
 
-#define RENDER_SYMBOLS L".,<>(){}[]~`!@#$%^&*?\"':;\\"
+#define RENDER_SYMBOLS L".,<>(){}[]~`!@#$%^&*?\"':;\\\u200C"
+#define DISCARD_CHARS L"\u200C"
 
 namespace ShapingEngine {
 
     namespace Options {
         // converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals automatically.
         inline bool _convertToArabicNumbers = false;
+        inline bool _discardChars = false;
     }
 
     namespace Helper {
@@ -258,9 +260,9 @@ namespace ShapingEngine {
         }
     }
 
-	// Finds and shapes any arabic text in the wstring and then returns it.
+    // Finds and shapes any arabic text in the wstring and then returns it.
     // (Converts to arabic presentation forms A-B, Also Takes care of vowels in words).
-	inline void shape_glyphs(std::wstring& t) {
+    inline void shape_glyphs(std::wstring& t) {
         std::vector<vowel_index> vowels;
         for (int i = 0; i < t.length(); i++)
         {
@@ -311,9 +313,24 @@ namespace ShapingEngine {
             ww[0] = (wchar_t)i.unicode;
             ww[1] = '\x0';
             t.insert(i.index, ww);
-        } 
+        }
         vowels.clear();
-	}
+    }
+
+    inline void discard_chars(std::wstring& t)
+    {
+        size_t writeIndex = 0;
+        for (size_t readIndex = 0; readIndex < t.length(); ++readIndex) {
+            if (wcschr(DISCARD_CHARS, t[readIndex]) == nullptr) {
+                if (writeIndex != readIndex) {
+                    t[writeIndex] = t[readIndex];
+                }
+                ++writeIndex;
+            }
+        }
+        if (writeIndex < t.length())
+            t.resize(writeIndex);
+    }
 
     // Converts normal numbers 123 to the Hindu–Arabic or Indo–Arabic numerals
     // returns a wide string
@@ -371,6 +388,8 @@ namespace ShapingEngine {
         // ***************************************
         shape_glyphs(t);
         reorder_glyphs(t, render_with_symbols);
+        if (Options::_discardChars)
+            discard_chars(t);
         if (Options::_convertToArabicNumbers)
             t = w_arabify_numbers(t);
     }
