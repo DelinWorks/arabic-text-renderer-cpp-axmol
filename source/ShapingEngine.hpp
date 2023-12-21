@@ -234,16 +234,35 @@ namespace ShapingEngine {
     };
 
     // Finds and reoders any arabic text in the wstring.
-    inline void reorder_glyphs(std::wstring& t, bool symbols) {
+    inline void reorder_glyphs(std::wstring& t, bool symbols, bool correct_num_order) {
         bool f = false;
         int ix = 0;
+
+        // two iterations, cannot be combined since ordering will change indices.
+        // and will not work, use correct_num_order when needed for performance.
+
+        if (correct_num_order)
+            for (int i = 0; i < t.length(); i++)
+            {
+                wchar_t l = t[i];
+                if ((l >= 48 && l <= 57) || l == 46)
+                {
+                    ix = i;
+                    int iy = i;
+                    while ((t[iy] >= 48 && t[iy] <= 57) || t[iy] == 46)
+                        iy++;
+                    std::reverse(t.begin() + ix, t.begin() + iy);
+                    i = iy;
+                }
+            }
+
         for (int i = 0; i < t.length(); i++) {
             wchar_t l = t[i];
             if (Helper::is_arabic_letter(l, f, symbols) && !f) {
                 f = true;
                 ix = i;
             }
-            if (!Helper::is_arabic_letter(l, true, symbols) && f) {
+            if (!Helper::is_arabic_letter(l, true, symbols) && !((l >= 48 && l <= 57) || (l >= 45 && l <= 46)) && f) {
                 f = false;
                 int iy = i;
                 while (t[ix] == ' ')
@@ -376,7 +395,7 @@ namespace ShapingEngine {
 
     // Render a piece of text containing arabic text. The string passed will not be copied and will be modified directly
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline void render_ref(std::wstring& t, bool render_with_symbols = false) {
+    inline void render_ref(std::wstring& t, bool render_with_symbols = false, bool correct_num_order = false) {
         Glyph::init_arabic();
         std::vector<std::wstring> words;
         Helper::wsplit(t, L" ", words);
@@ -387,7 +406,7 @@ namespace ShapingEngine {
         while (Helper::wreplace(t, L"\u0644\u0622", L"\uFEF5")); // لآ
         // ***************************************
         shape_glyphs(t);
-        reorder_glyphs(t, render_with_symbols);
+        reorder_glyphs(t, render_with_symbols, correct_num_order);
         if (Options::_discardChars)
             discard_chars(t);
         if (Options::_convertToArabicNumbers)
@@ -396,16 +415,18 @@ namespace ShapingEngine {
 
     // Render a piece of text containing arabic text. The returned string is NOT narrowed
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline std::wstring wrender(std::wstring t, bool render_with_symbols = false) {
+    // @param correct_num_order retains order of english numbers when rendered with arabic text.
+    inline std::wstring wrender(std::wstring t, bool render_with_symbols = false, bool correct_num_order = false) {
         std::wstring out = t;
-        render_ref(out, render_with_symbols);
+        render_ref(out, render_with_symbols, correct_num_order);
         return out;
     }
 
     // Render a piece of text containing arabic text. The returned string IS narrowed
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
-    inline std::string render(std::wstring& t, bool render_with_symbols = false) {
-        return Helper::narrow(wrender(t, render_with_symbols));
+    // @param correct_num_order retains order of english numbers when rendered with arabic text.
+    inline std::string render(std::wstring& t, bool render_with_symbols = false, bool correct_num_order = false) {
+        return Helper::narrow(wrender(t, render_with_symbols, correct_num_order));
     }
 
     // Render a piece of text containing arabic text that can may contain numbers or multiple lines.
@@ -413,8 +434,9 @@ namespace ShapingEngine {
     // @param tff ttf font definition from a label
     // @param t text to render
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
+    // @param correct_num_order retains order of english numbers when rendered with arabic text.
     // @param wrap_x pixels that a sentence must exceed to go to the next line
-    inline std::wstring wrender_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
+    inline std::wstring wrender_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, bool correct_num_order = false, float wrap_x = FLT_MAX) {
         auto lb = ax::Label::createWithTTF(Helper::narrow(t), ttf.fontFilePath, ttf.fontSize);
         lb->updateContent();
         auto fontAtlas = lb->getFontAtlas();
@@ -452,7 +474,7 @@ namespace ShapingEngine {
                 wordCount--;
             else {
                 for (int i = wordCount - 1; i >= 0; i--)
-                    accString += wrender(words[i], render_with_symbols) + L" ";
+                    accString += wrender(words[i], render_with_symbols, correct_num_order) + L" ";
                 words.erase(words.begin(), words.begin() + wordCount);
                 wordCount = words.size();
                 accString += L"\n";
@@ -467,9 +489,10 @@ namespace ShapingEngine {
     // @param tff ttf font definition from a label
     // @param t text to render
     // @param render_with_symbols renders arabic text while treating symbol characters like arabic letter.
+    // @param correct_num_order retains order of english numbers when rendered with arabic text.
     // @param wrap_x pixels that a sentence must exceed to go to the next line
-    inline std::string render_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, float wrap_x = FLT_MAX) {
-        return Helper::narrow(wrender_wrap(ttf, t, render_with_symbols, wrap_x));
+    inline std::string render_wrap(ax::TTFConfig ttf, std::wstring& t, bool render_with_symbols = false, bool correct_num_order = false, float wrap_x = FLT_MAX) {
+        return Helper::narrow(wrender_wrap(ttf, t, render_with_symbols, correct_num_order, wrap_x));
     }
 
     // Splits the text for each new line it finds, then it reverses the words in all lines
